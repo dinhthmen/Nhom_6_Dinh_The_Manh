@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi CV An Toàn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS tương tự như trước để giữ giao diện đẹp */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px 50px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        p {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="file"] {
+            width: calc(100% - 20px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="file"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .button-upload {
+            background-color: #2ecc71;
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .button-upload:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .button-upload:active {
+            transform: translateY(0);
+        }
+
+        .status-message {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none; /* Hidden by default */
+        }
+
+        .status-message.success {
+            background-color: #e6ffe6;
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .status-message.error {
+            background-color: #ffe6e6;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gửi CV Của Bạn</h1>
+        <p>Vui lòng điền thông tin và tải lên CV của bạn một cách an toàn. Chúng tôi cam kết bảo mật dữ liệu của bạn.</p>
+
+        <form id="cvUploadForm">
+            <div class="form-group">
+                <label for="fullName">Họ và Tên:</label>
+                <input type="text" id="fullName" name="fullName" required placeholder="Nguyễn Văn A">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required placeholder="vidu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Số Điện Thoại:</label>
+                <input type="text" id="phone" name="phone" placeholder="09xxxxxxxx">
+            </div>
+
+            <div class="form-group">
+                <label for="cvFile">Tải lên CV (PDF, DOCX):</label>
+                <input type="file" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" required>
+            </div>
+
+            <button type="submit" class="button-upload">Gửi CV</button>
+        </form>
+
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script>
+        document.getElementById('cvUploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Ngăn chặn form gửi đi theo cách thông thường
+
+            const statusMessageDiv = document.getElementById('statusMessage');
+            statusMessageDiv.style.display = 'none'; // Ẩn thông báo cũ
+            statusMessageDiv.textContent = ''; // Xóa nội dung cũ
+
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const cvFile = document.getElementById('cvFile').files[0];
+
+            if (!fullName || !email || !cvFile) {
+                statusMessageDiv.textContent = 'Vui lòng điền đầy đủ Họ và Tên, Email và chọn tệp CV.';
+                statusMessageDiv.className = 'status-message error';
+                statusMessageDiv.style.display = 'block';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('fullName', fullName);
+            formData.append('email', email);
+            formData.append('phone', phone);
+            formData.append('cvFile', cvFile);
+
+            try {
+                // RẤT QUAN TRỌNG: Đảm bảo URL này khớp với địa chỉ Flask server của bạn
+                // Mặc định là http://127.0.0.1:5000/upload_cv
+                const response = await fetch('http://127.0.0.1:5000/upload_cv', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusMessageDiv.textContent = result.message || 'CV của bạn đã được gửi thành công!';
+                    statusMessageDiv.className = 'status-message success';
+                    document.getElementById('cvUploadForm').reset(); // Xóa form sau khi gửi thành công
+                } else {
+                    statusMessageDiv.textContent = result.error || 'Đã có lỗi xảy ra khi gửi CV. Vui lòng thử lại.';
+                    statusMessageDiv.className = 'status-message error';
+                }
+            } catch (error) {
+                console.error('Lỗi khi gửi CV:', error);
+                statusMessageDiv.textContent = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc địa chỉ máy chủ.';
+                statusMessageDiv.className = 'status-message error';
+            } finally {
+                statusMessageDiv.style.display = 'block'; // Hiển thị thông báo
+            }
+        });
+    </script>
+</body>
+</html>
